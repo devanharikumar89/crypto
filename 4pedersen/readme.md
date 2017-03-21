@@ -13,6 +13,10 @@
 
 2. The Committer class runs first listening on an established port number as per the properties file. All the values for p, q, g etc are chosen in the same way they were in the commitment module. When the Verifier class runs it establishes a channel between itself and the Committer. They exchange values h, committed message etc. This implementation overcomes the drawback of the previous implementation in that the committer has no knowledge of the h value. 
 
+### TO-DO
+
+3. This module can be made much simpler (we can do away with p, q, g etc ) by implementing Pedersen Commitment using the inbuilt classes for SCAPI. For this all we need is the Channel object that is created by establishing connection between the Committer and Verifier. 
+
 ## How to run
 
 1. Install java, scapi
