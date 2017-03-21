@@ -2,4 +2,4 @@
 #### [Merkle Tree Implementation](https://github.com/devanharikumar89/crypto/tree/master/merkle)
 #### [Commitment](https://github.com/devanharikumar89/crypto/tree/master/commitment)
 #### [Channel Implementation](https://github.com/devanharikumar89/crypto/tree/master/channel) 
-#### [Pedersen Commitment]
+#### [Pedersen Commitment](https://github.com/devanharikumar89/crypto/tree/master/pedersen)
