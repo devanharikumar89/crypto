@@ -22,3 +22,4 @@
 1. Install java, scapi
 2. Run Committer.java
 3. Run Verifier.java
+4. Follow the instruction prompted by the programs
