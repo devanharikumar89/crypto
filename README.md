@@ -3,3 +3,4 @@
 #### [Commitment](https://github.com/devanharikumar89/crypto/tree/master/2commitment)
 #### [Channel Implementation](https://github.com/devanharikumar89/crypto/tree/master/3channel) 
 #### [Pedersen Commitment](https://github.com/devanharikumar89/crypto/tree/master/4pedersen)
+#### [Sigma Protocol](https://github.com/devanharikumar89/crypto/tree/master/5sigmaprotocol)
