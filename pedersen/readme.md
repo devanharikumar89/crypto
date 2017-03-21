@@ -1,4 +1,4 @@
-##[Pedersen Commitment](http://crypto.stackexchange.com/questions/9704/why-is-the-pedersen-commitment-computationally-binding)
+## [Pedersen Commitment](http://crypto.stackexchange.com/questions/9704/why-is-the-pedersen-commitment-computationally-binding)
 
 * Let p and q be large primes such that q|(p-1)
 * g - generator of the order-q sub group of Zp
