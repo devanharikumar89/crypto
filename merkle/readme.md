@@ -5,7 +5,7 @@ Demonstrating that a leaf node is a part of the given hash tree requires process
 
 # Notes on Implementation
 
-1. Merkle.java is the file that has the basic class that holds the implementations of each of the operations in the Merkle tree.
+1. Merkle.java is the file that has the basic class that holds the implementations of each of the operations in the Merkle tree. Node.java is the object that is in every node of the tree. MerkleUtils provides additional functionality in the implementation of Merkle trees. For a detailed information on the implementaion, inline comments are provided in the source code.
 
 2. The leaf nodes of the Merkle tree hold data. In case the number of nodes are not a power of 2, we pad it to the nearest power of 2. After that, each pair of nodes at any level is hashed to make a node at the higher level. This continues until we get just one node which is the root node. 
 
