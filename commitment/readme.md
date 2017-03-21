@@ -1,6 +1,9 @@
-## [Pedersen Commitment SCAPI wiki](http://scapi.readthedocs.io/en/latest/interactive_layer/commitments.html)
-
-
+## [Commitment Scheme wiki](https://en.wikipedia.org/wiki/Commitment_scheme)
+In cryptography, a commitment scheme allows one to commit to a chosen value (or chosen statement) while keeping it hidden to others, with the ability to reveal the committed value later.[1] Commitment schemes are designed so that a party cannot change the value or statement after they have committed to it: that is, commitment schemes are binding. Commitment schemes have important applications in a number of cryptographic protocols including secure coin flipping, zero-knowledge proofs, and secure computation.
+A way to visualize a commitment scheme is to think of a sender as putting a message in a locked box, and giving the box to a receiver. The message in the box is hidden from the receiver, who cannot open the lock themselves. Since the receiver has the box, the message inside cannot be changed—merely revealed if the sender chooses to give them the key at some later time.
+Interactions in a commitment scheme take place in two phases:
+the commit phase during which a value is chosen and specified
+the reveal phase during which the value is revealed and checked
 
 ## Notes on Implementation
 
