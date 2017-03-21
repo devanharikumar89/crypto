@@ -3,11 +3,13 @@
 This implementation is more or less the direct application of the inbuilt Pedersen Commitment of the SCAPi library. Using this, one can commit any data. Everything other than the choice of the discrete log group and the channel object is abstracted away by the SCAPI implementation making the implementation concise.
 
 ### Notes on Implementation
-1 There are two classes - Committer and Receiver much like the previous iterations of Pedersen Implementation in this project. A channel object is created by making them communicate with each other. 
+1. There are two classes - Committer and Receiver much like the previous iterations of Pedersen Implementation in this project. A channel object is created by making them communicate with each other. 
 
-2 In addition to the channel object this commitment scheme also requires a discrete log group implementation of our choice.
+2. In addition to the channel object this commitment scheme also requires a discrete log group implementation of our choice.
 
-3 Any string can be committed with this scheme.
+3. Any string can be committed with this scheme.
+
+4. This implementation deprecates all the previous iterations of pedersen commitment.  
 
 ### How to run
 * Install scapi, java 1.6 or later
