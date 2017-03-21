@@ -11,7 +11,7 @@ the reveal phase during which the value is revealed and checked
 
 2. Using the discrete log functionality, DiscreteLogCommitment.java was written next. This class includes an initialization method init() to use q, g and p from the user input to create the discrete log group. In addition to init, it has the commit and decommit methods. Verify is the last method in the class that makes sure the commitment scheme holds. 
 
-3. A problem with the design of DiscreteLogCommitment.java was that the committer and verifier were part of the same class, which means the committer knows the value of h before verifier tells him. This had to be changed. This meant moving the commit and decommit methods to different classes and making them communicate through sockets. Read about [channels](https://github.com/devanharikumar89/crypto/tree/master/channel) 
+3. A problem with the design of DiscreteLogCommitment.java was that the committer and verifier were part of the same class, which means the committer knows the value of h before verifier tells him. This had to be changed. This meant moving the commit and decommit methods to different classes and making them communicate through sockets. Read about [channels](https://github.com/devanharikumar89/crypto/tree/master/3channel) 
 
 
 ## How to run
