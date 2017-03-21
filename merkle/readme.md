@@ -17,7 +17,7 @@ Demonstrating that a leaf node is a part of the given hash tree requires process
 
 ## How to Run
 
-..* Install java 1.6 or later.
-..* Import the files Merkle.java, Node.java and MerkleUtils.java into the system.
-..* Update Merkle.java : String[] data = {} with the string input you wish to give and run.
-..* Call any functions that are provided by the API as required.
+* Install java 1.6 or later.
+* Import the files Merkle.java, Node.java and MerkleUtils.java into the system.
+* Update Merkle.java : String[] data = {} with the string input you wish to give and run.
+* Call any functions that are provided by the API as required.
