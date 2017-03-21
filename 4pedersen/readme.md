@@ -15,7 +15,7 @@
 
 ### To do
 
-3. This module can be made much simpler (we can do away with p, q, g etc ) by implementing Pedersen Commitment using the inbuilt classes for SCAPI. For this all we need is the Channel object that is created by establishing connection between the Committer and Verifier. 
+3. This module can be made much simpler (we can do away with p, q, g etc ) by implementing Pedersen Commitment using the inbuilt classes for SCAPI. For this all we need is the Channel object that is created by establishing connection between the Committer and Verifier. (This implementation can be made into a separate module)
 
 ## How to run
 
