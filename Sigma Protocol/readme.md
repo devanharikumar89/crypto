@@ -6,6 +6,8 @@
 
 3. Started using OpenSSLDlogZpSafePrime class for the DlogGroup however it gave the error saying that the requested value for ZpElement is not a quadratic resideue. Hence changed the DlogGroup to MiraclDlogECF2m.
 
+4. The t value was initialized at 1000 and it threw and error saying that it was too high. Changed it to 10. 
+
 
 
 
