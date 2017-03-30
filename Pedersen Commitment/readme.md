@@ -1,7 +1,3 @@
-### [Pedersen Commitment using SCAPI inbuilt classes](http://scapi.readthedocs.io/en/latest/interactive_layer/commitments.html?highlight=pedersen%20commitment)
-
-This implementation is more or less the direct application of the inbuilt Pedersen Commitment of the SCAPi library. Using this, one can commit any data. Everything other than the choice of the discrete log group and the channel object is abstracted away by the SCAPI implementation making the implementation concise.
-
 ### Notes on Implementation
 1. There are two classes - Committer and Receiver much like the previous iterations of Pedersen Implementation in this project. A channel object is created by making them communicate with each other. 
 
