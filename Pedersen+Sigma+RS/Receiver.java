@@ -29,13 +29,14 @@ import edu.biu.scapi.interactiveMidProtocols.sigmaProtocol.utility.SigmaProverIn
 import edu.biu.scapi.interactiveMidProtocols.sigmaProtocol.dlog.SigmaDlogProverInput;
 
 
-public class  Verifier{
+public class  Receiver{
 	BigInteger g, p, q, h;
+    BigInteger secret;
 	CryptoPpDlogZpSafePrime dlog;
 	SecureRandom random;
 	GroupElement g_ge;
     Channel channel;
-	public Verifier(){
+	public Receiver(){
 		init();
 	}
 
@@ -59,16 +60,16 @@ public class  Verifier{
         //System.out.println("q_minus_one : "+q_minus_one.toString());
 
         // create a random exponent a
-        BigInteger a = BigIntegers.createRandomInRange(BigInteger.ZERO, q_minus_one, random);
+        secret = BigIntegers.createRandomInRange(BigInteger.ZERO, q_minus_one, random);
         //System.out.println("a : "+a.toString());
 
         // exponentiate g in r to receive a new group element
-        GroupElement g_power_a_ge = dlog.exponentiate(g_ge, a);
-        BigInteger g_power_a = ((ZpElement) g_power_a_ge).getElementValue();
+        GroupElement g_power_secret_ge = dlog.exponentiate(g_ge, secret);
+        BigInteger g_power_secret = ((ZpElement) g_power_secret_ge).getElementValue();
         //System.out.println("g_power_a : "+g_power_a.toString());
         
-        BigInteger g_power_a_mod_p = g_power_a.mod(p);
-        h = g_power_a_mod_p;//receiver should choose this, and use sigma protocol to show that.
+        BigInteger g_power_secret_mod_p = g_power_secret.mod(p);
+        h = g_power_secret_mod_p;//receiver should choose this, and use sigma protocol to show that.
         //System.out.println("h: "+h.toString());
     }catch(Exception e){
         System.out.println(e.toString());
@@ -160,7 +161,7 @@ public class  Verifier{
         order to open the commitment, the sender reveals m and r, and the receiver verifies that c=g^m * h^r mod p.
         */
 
-        Verifier dlc = new Verifier();
+        Receiver dlc = new Receiver();
         System.out.println("COMMIT PHASE : \n");
         System.out.println("\nSending h\n\n");
         dlc.channel.send(dlc.h.toString());
@@ -218,9 +219,9 @@ public class  Verifier{
 
         //GroupElement g = pro.dlog.getGenerator();
         //BigInteger w = new BigInteger("1234");//secret
-        GroupElement y = dlc.dlog.exponentiate(dlc.g_ge, dlc.h);
+        //GroupElement y = dlc.dlog.exponentiate(dlc.g_ge, dlc.h);
 
-        dlc.channel.send(y.generateSendableData());
+        //dlc.channel.send(y.generateSendableData());
 
         SigmaProverComputation proverComputation = new SigmaDlogProverComputation(dlc.dlog, t, new SecureRandom());
 
@@ -233,7 +234,8 @@ public class  Verifier{
         //h should be a BigInteger
 
        // TimeUnit.SECONDS.sleep(2);
-        SigmaProverInput input = new SigmaDlogProverInput(y, dlc.h);
+        GroupElement h_val = dlc.dlog.generateElement(false, dlc.h);
+        SigmaProverInput input = new SigmaDlogProverInput(h_val, dlc.secret);
        // TimeUnit.SECONDS.sleep(2);
         //Calls the prove function of the prover.
         prover.prove(input);

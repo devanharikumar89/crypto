@@ -290,7 +290,7 @@ public class Committer{
         System.out.println("VERIFIER\n\n\n");
        // TimeUnit.SECONDS.sleep(5);
         System.out.println("SCAPI Internal Verification");
-        GroupElement y  = dlc.dlog.reconstructElement(false, (GroupElementSendableData)dlc.channel.receive());
+        //GroupElement y  = dlc.dlog.reconstructElement(false, (GroupElementSendableData)dlc.channel.receive());
        // TimeUnit.SECONDS.sleep(5);
         //t - soundness parameter in bits
         int t = 64;
@@ -299,7 +299,8 @@ public class Committer{
         SigmaVerifier verifier = new SigmaVerifier(dlc.channel, verifierComputation);
         // Creates input for the verifier.
         //Sets the given h
-        SigmaCommonInput input = new SigmaDlogCommonInput(y);
+        GroupElement h_ge = dlc.dlog.generateElement(false, dlc.h);
+        SigmaCommonInput input = new SigmaDlogCommonInput(h_ge);
         //Calls the verify function of the verifier.
         //verifier.verify(input); 
         Boolean result = verifier.verify(input);
