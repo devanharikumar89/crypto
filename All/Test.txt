@@ -1,0 +1,9 @@
+class Test{
+	public static void main(String[]args){
+		String input = "you create a beauty";
+		int t=8;
+		int pad = (t+1)-(input.length() % (t+1));
+		input += String.format("%1$-"+(pad)+"s", "" ).replace(" ", "0");
+		System.out.println(input);
+	}
+}
