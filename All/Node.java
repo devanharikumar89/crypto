@@ -22,25 +22,23 @@ public class Node {
 	private int id;
 
 	// constructor only to be used for leaves
-	public Node(String data, int id) {
+	public Node(String data) {
 		this.data = data;
 		this.sha256 = MerkleUtils.getHash(data);
 		this.isLeaf = true;
 		this.left = null;
 		this.right = null;
 		this.parent = null;
-		this.id = id;
 	}
 
 	// constructor only to be used for non-leaf nodes
-	public Node(Node left, Node right, int id) {
+	public Node(Node left, Node right) {
 		this.data = null;
 		this.sha256 = MerkleUtils.getHash(left.sha256, right.sha256);
 		this.isLeaf = false;
 		this.left = left;
 		this.right = right;
 		this.parent = null;
-		this.id = id;
 	}
     //public getters and setters for private fields.
 	

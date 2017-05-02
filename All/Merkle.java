@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Queue;
+import java.util.LinkedList;
 
 /**
  * @author devan
@@ -21,8 +25,28 @@ public class Merkle {
 	private byte[] sha256;
 	private List<Node> allNodes;
 	private int dataIndices;
+	//this value has to be added to convert index to id
+	private int offset;
+	//this map holds all the nodes against their ids
+	private Map<Integer, Node>nodeMap;
 
 	//getters and setters begin here
+	public Map<Integer, Node> getNodeMap(){
+		return nodeMap;
+	}
+	
+	public void setNodeMap(Map<Integer, Node>nodeMap) {
+		this.nodeMap = nodeMap;
+	}
+
+	public int getOffset(){
+		return offset;
+	}
+	
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+	
 	public int getDataIndices() {
 		return dataIndices;
 	}
@@ -66,6 +90,7 @@ public class Merkle {
 	 * the constructor meant for non leaf nodes.
 	 * */
 	public void makeMerkleTree(String[] values) {
+
 		if (values == null || values.length <= 0) {
 			System.out.println("Invalid number of values");
 			System.exit(0);
@@ -76,11 +101,11 @@ public class Merkle {
 		{
 			pad(list);
 		}
+		this.offset = list.size()-1;
 		this.dataIndices = list.size();
 		this.allNodes = new ArrayList<Node>();
-		int id = 0;
 		for (String str : list) {
-			allNodes.add(new Node(str, id++));
+			allNodes.add(new Node(str));
 		}
 		int limit = allNodes.size();
 		int counter = 0;
@@ -90,7 +115,7 @@ public class Merkle {
 			while (count < limit) {
 				Node left = allNodes.get(counter++);
 				Node right = allNodes.get(counter++);
-				Node parent = new Node(left, right, id++);
+				Node parent = new Node(left, right);
 				left.setParent(parent);
 				right.setParent(parent);
 				temp.add(parent);
@@ -101,9 +126,34 @@ public class Merkle {
 		}
 		// System.out.println(allNodes.toString());
 		this.root = allNodes.get(allNodes.size() - 1);
-		/*
-		 * for (Node node : allNodes) { System.out.println(node.getId()); }
-		 */
+		//At this point we assign the ids of all the nodes, 
+		//in a top down fashion (level order traversal)
+		//so that the reveal operation becomes easier
+		//This function also updates the node map
+		assignIds();
+		System.out.println("\n\nMERKLE TREE CREATION");
+		System.out.println("____________________\n\n");
+		System.out.println("Number of leaves with data : "+len);
+		System.out.println("Number of leaves : "+dataIndices);
+		System.out.println("Status : OK\n\n");
+			
+	}
+
+	private void assignIds(){
+		Queue<Node> queue = new LinkedList<Node>();
+		nodeMap = new HashMap<Integer, Node>();
+        queue.add(this.root);
+        int id = 1;
+        while(!queue.isEmpty()){
+        	Node temp = queue.poll();
+        	temp.setId(id);
+        	nodeMap.put(id++, temp);
+
+        	if(temp.getLeft()!=null)
+        	queue.add(temp.getLeft());
+        	if(temp.getRight()!=null)
+        	queue.add(temp.getRight());
+        }
 	}
 
 	//function used to pad the list to a power of 2
@@ -119,6 +169,7 @@ public class Merkle {
 		}
 	}
 
+
 	//given the index of a node, this one returns its sibling
 	private int getSibling(int index) {
 		return index % 2 == 0 ? index + 1 : index - 1;
@@ -126,34 +177,57 @@ public class Merkle {
 
 	//Given an index this function reveals the list of nodes sibling
 	//to those fall in the path of that node from the leaf to the root
+	//Update : this index is the number of the node at the leaf level from
+	//left to right. We need to add the proper offset to match the id number
 	public List<Node> reveal(int index) {
-		if (index >= this.dataIndices) {
+		if (index > this.dataIndices) {
 			System.out.println("INDEX OUT OF BOUNDS");
 			System.exit(0);
 		}
-		if (index >= this.root.getId()) {
-			System.out.println("ONLY ROOT DATA");
-		}
+		int id = index+offset;
 		List<Node> siblingsUpstream = new ArrayList<Node>();
 		Node node = this.allNodes.get(index);
-		while (node.getParent() != null) {
-			siblingsUpstream.add(this.allNodes.get(getSibling(node.getId())));
-			node = node.getParent();
+		while (id!=1) {
+			siblingsUpstream.add(this.nodeMap.get(getSibling(id)));
+			id/=2;
 		}
-		for (Node k : siblingsUpstream) {
-			System.out.println(k.getId());
-		}
+		
 		return siblingsUpstream;
 	}
+
+	public String revealEncoded(int index) {
+		List<Node> unencodedSiblings = reveal(index);
+		StringBuilder sb = new StringBuilder("");
+		for(Node node : unencodedSiblings){
+			if(node.getId()%2==0){
+				sb.append("L,");
+			}else{
+				sb.append("R,");
+			}
+			sb.append(getSerialByteArray(node.getSha256()));
+			sb.append("|");
+		}
+		return sb.toString().substring(0, sb.length()-1);
+	}
+
+	private String getSerialByteArray(byte[] array){
+        StringBuilder sb = new StringBuilder();
+        for(byte b : array){
+            sb.append(String.valueOf(b));
+            sb.append(",");
+        }
+        return sb.toString().substring(0, sb.length()-1);
+    }
 
 	//This function updates a particular leaf node at a given index
 	//to a particular value and updates all the hash values up the tree
 	public void update(int index, String val) {
-		if (index >= this.dataIndices) {
+		if (index > this.dataIndices) {
 			System.out.println("INDEX OUT OF BOUNDS");
 			System.exit(0);
 		}
-		Node node = this.allNodes.get(index);
+		int id = index+offset;
+		Node node = this.nodeMap.get(id);
 		node.setData(val);
 		node.setSha256(MerkleUtils.getHash(val));
 		List<Node> siblingsUpstream = reveal(index);
@@ -168,7 +242,7 @@ public class Merkle {
 	//Given an index and the output of its reveal operation, this function verifies if
 	//it is correct.
 	public boolean verify(List<Node> siblingsUpstream, int index) {
-		Node leaf = this.allNodes.get(index);
+		Node leaf = this.nodeMap.get(offset+index);
 		byte[] firstHash = MerkleUtils.getHash(leaf.getData());
 		for (Node sibling : siblingsUpstream) {
 			if (leaf.getId() % 2 == 0) {
@@ -184,22 +258,21 @@ public class Merkle {
 	public void visualize() {
 		for (Node node : this.allNodes) {
 			System.out.println("Node : " + node.getId());
-			System.out.println("DATA : " + node.getData());
-			System.out.println("SHA 256 : " + Arrays.toString(node.getSha256()));
-			System.out.println(
-					"______________________________________________________________________________________________________________________________________________________");
-		}
+			//System.out.println("DATA : " + node.getData());
+			//System.out.println("SHA 256 : " + Arrays.toString(node.getSha256()));
+			}
 	}
 
 	//public static void main(String[] args) {
-	//	String[] data = { "hello", "my", "name", "is", "devan", "harikumar", "and", "I", "am", "a", "student", "at", "NC", "State", "University", "Raleigh", "USA" };
+	//	String[] data = { "hello", "my", "name", "is", "devan"};
 	//	Merkle tree = new Merkle();
 	//	tree.makeMerkleTree(data);
-		// tree.update(6, "but");
-		//tree.reveal(3);
-		//tree.visualize();
-		// remove the print in reveal() because it is getting called internally
-		// in update function as well.
+	//	tree.update(12, "but");
+	//	System.out.println(tree.revealEncoded(3));
+	//	tree.visualize();
+	//	System.out.println(tree.verify(tree.reveal(19), 19));
+	//	// remove the print in reveal() because it is getting called internally
+	//	// in update function as well.
 	//	System.out.println(tree.verify(tree.reveal(17), 17));
 	//}
 }

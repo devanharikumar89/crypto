@@ -81,9 +81,9 @@ public class  Receiver{
     public void establishConnection(){
         LoadSocketParties loadParties = new LoadSocketParties("socket.properties");
         List<PartyData> listOfParties = loadParties.getPartiesList();
-        for(PartyData data : listOfParties){
-            System.out.println(data.toString());
-        }
+        //for(PartyData data : listOfParties){
+        //   System.out.println(data.toString());
+        //}
         try{
         //Note that the following line is different for a server and client
         TwoPartyCommunicationSetup commSetup = new SocketCommunicationSetup(listOfParties.get(1), listOfParties.get(0));
@@ -108,17 +108,17 @@ public class  Receiver{
 
 
        // TimeUnit.SECONDS.sleep(2);
-        System.out.println("g : "+g.toString()+"\n\n");
+        //System.out.println("g : "+g.toString()+"\n\n");
         //TimeUnit.SECONDS.sleep(2);
-        System.out.println("p : "+p.toString()+"\n\n");
+        //System.out.println("p : "+p.toString()+"\n\n");
         //TimeUnit.SECONDS.sleep(2);
-        System.out.println("q : "+q.toString()+"\n\n");
+        //System.out.println("q : "+q.toString()+"\n\n");
         //TimeUnit.SECONDS.sleep(2);
-        System.out.println("h : "+h.toString()+"\n\n");
+        //System.out.println("h : "+h.toString()+"\n\n");
         //TimeUnit.SECONDS.sleep(2);
-        System.out.println("m : "+m.toString()+"\n\n");
+        //System.out.println("m : "+m.toString()+"\n\n");
         //TimeUnit.SECONDS.sleep(2);
-        System.out.println("r : "+r.toString()+"\n\n");
+        //System.out.println("r : "+r.toString()+"\n\n");
        // TimeUnit.SECONDS.sleep(2);
 
         GroupElement g_power_m_ge_rev = dlog.exponentiate(g_ge, m);
@@ -159,6 +159,19 @@ public class  Receiver{
             array[i]=Byte.parseByte(parts[i]);
         }
         return array;
+    }
+
+    public boolean verifyHash(String commitString, String[]siblings, byte[]sha){
+        byte[]tester = MerkleUtils.getHash(commitString);
+        for(String str : siblings){
+            byte[]sibling = formatByteArray(str.substring(2));
+            if(str.charAt(0)=='L'){
+                tester = MerkleUtils.getHash(sibling, tester);
+            }else{
+                tester = MerkleUtils.getHash(tester, sibling);
+            }
+        }
+        return Arrays.equals(tester, sha);
     }
 
 
@@ -209,7 +222,6 @@ public class  Receiver{
         //Calls the prove function of the prover.
         prover.prove(input);
         System.out.println("\n\nProver rests");
-        System.out.println("\n___________________________________________________________________");
 
 
 
@@ -222,7 +234,7 @@ public class  Receiver{
        //while(gh-->0){
 
         String deCommString = (String)dlc.channel.receive();
-        System.out.println(deCommString);
+        //System.out.println(deCommString);
         byte[] sha = dlc.formatByteArray(deCommString);
         System.out.println(new String(sha));
         //String[] deCommitments = deCommString.split("\\|");                                                                             
@@ -243,7 +255,7 @@ public class  Receiver{
         //Merkle tree queries start here.
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while(true){
-        System.out.println("Enter the node to be revealed, return for exit");
+        System.out.println("Enter the node to be revealed, return for exit\nThis can range from 1 to the number of leaf nodes in Merkle tree with data\n");
         String in = br.readLine();
         if(in.length()==0){
             break;
@@ -258,14 +270,21 @@ public class  Receiver{
 
         String rString = (String)dlc.channel.receive();
         String[] rStrings = rString.split("\\|");                                                                                 
-        System.out.println("Received r. \nSending ack\n\n");
+        System.out.println("Received randoms. \nSending ack\n\n");
         dlc.channel.send("ack");
 
         String mString = (String)dlc.channel.receive();
         String[] mStrings = mString.split("\\|");                                                                               
-        System.out.println("Received m. \nSending ack\n\n");
+        System.out.println("Received messages. \nSending ack\n\n");
         dlc.channel.send("ack");
 
+        String encodedSiblings = (String)dlc.channel.receive();
+        String[] siblings = encodedSiblings.split("\\|");                                                                               
+        System.out.println("Received Merkle tree data for verification. \nSending ack\n\n");
+        dlc.channel.send("ack");
+
+
+        System.out.println("Merkle Tree holds : "+dlc.verifyHash(commitString, siblings, sha));
 
         for(int i=0; i<commitStrings.length-1; i++){
 

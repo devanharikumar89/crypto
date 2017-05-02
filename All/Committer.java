@@ -21,6 +21,8 @@ import edu.biu.scapi.interactiveMidProtocols.sigmaProtocol.dlog.SigmaDlogCommonI
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.StringBuilder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Committer{
     //g generator
@@ -55,9 +57,9 @@ public class Committer{
         //The following step is to make sure that both the parties have the same global values for g, q and p.
         //This has to be changed to a secure 3rd party.
         channel.send(g.toString()+"|"+q.toString()+"|"+p.toString());
-    }catch(Exception e){
-        System.out.println(e.toString());
-    }
+        }catch(Exception e){
+            System.out.println(e.toString());
+        }
     }
 
     //The following function reads the properties file and establishes a connection (called as channel)
@@ -65,9 +67,9 @@ public class Committer{
     public void establishConnection(){
         LoadSocketParties loadParties = new LoadSocketParties("socket.properties");
         List<PartyData> listOfParties = loadParties.getPartiesList();
-        for(PartyData data : listOfParties){
-            System.out.println(data.toString());
-        }
+        //for(PartyData data : listOfParties){
+        //    System.out.println(data.toString());
+        //}
         try{
         TwoPartyCommunicationSetup commSetup = new SocketCommunicationSetup(listOfParties.get(0), listOfParties.get(1));
 
@@ -94,17 +96,17 @@ public class Committer{
         //System.out.println("m : "+m.toString());
        // System.out.println("Commit Phase : \n");
         //TimeUnit.SECONDS.sleep(2);
-        System.out.println("g : "+g.toString()+"\n\n");
+        //System.out.println("g : "+g.toString()+"\n\n");
         //TimeUnit.SECONDS.sleep(2);
-        System.out.println("p : "+p.toString()+"\n\n");
+        //System.out.println("p : "+p.toString()+"\n\n");
        // TimeUnit.SECONDS.sleep(2);
-        System.out.println("q : "+q.toString()+"\n\n");
+        //System.out.println("q : "+q.toString()+"\n\n");
        //TimeUnit.SECONDS.sleep(2);
-        System.out.println("h : "+h.toString()+"\n\n");
+        //System.out.println("h : "+h.toString()+"\n\n");
        // TimeUnit.SECONDS.sleep(2);
-        System.out.println("m : "+m.toString()+"\n\n");
+        //System.out.println("m : "+m.toString()+"\n\n");
         //TimeUnit.SECONDS.sleep(2);
-        System.out.println("r : "+r.toString()+"\n\n");
+        //System.out.println("r : "+r.toString()+"\n\n");
         //TimeUnit.SECONDS.sleep(2);
         //System.out.println("m : "+m.toString()+"\nr : "+r.toString()+"\n");
 
@@ -149,9 +151,10 @@ public class Committer{
         
         /*
         Let p and q be large primes such that q∣(p−1), let g be a generator of the order-q subgroup of Z⋆p. Let a be a random secret from Zq
-        and h=g^a mod p. The values p, q, g and h are public, while a is secret.
+        and h=g^a mod p. The values p, q, g are public, while a is secret and is chosen by the Receiver which is something we prove using the 
+        Sigma protocol
 
-        To commit to a message m∈Zq, the sender chooses a random r∈Zq and sends the commitment c=g^m * h^r mod p to the receiver; while in
+        To commit to a message m∈Zq, the sender chooses a random r∈Zq and sends the commitment c=g^m * h^r to the receiver; while in
         order to open the commitment, the sender reveals m and r, and the receiver verifies that c=g^m * h^r mod p.
         */
 
@@ -159,47 +162,56 @@ public class Committer{
         dlc.random = new SecureRandom();        
         BigInteger q_minus_one = dlc.q.subtract(BigInteger.ONE);
 
+        //The value h is received from the Receiver.
         String h_val = (String)dlc.channel.receive();
-        //TimeUnit.SECONDS.sleep(5);
         dlc.h = new BigInteger(h_val);
         System.out.println("Received h\n\n");
-        //This is where this party receives h value from the other party.
 
 
 
         System.out.println("Sigma Protocol Starts\n\n");
         System.out.println("VERIFIER\n\n\n");
-       // TimeUnit.SECONDS.sleep(5);
         System.out.println("SCAPI Internal Verification");
-        //GroupElement y  = dlc.dlog.reconstructElement(false, (GroupElementSendableData)dlc.channel.receive());
-       // TimeUnit.SECONDS.sleep(5);
         //t - soundness parameter in bits
         int t = 64;
         SigmaVerifierComputation verifierComputation = new SigmaDlogVerifierComputation(dlc.dlog, t, new SecureRandom());
-        //Creates Sigma verifier with the given SigmaVerifierComputation.
         SigmaVerifier verifier = new SigmaVerifier(dlc.channel, verifierComputation);
-        // Creates input for the verifier.
-        //Sets the given h
         GroupElement h_ge = dlc.dlog.generateElement(false, dlc.h);
         SigmaCommonInput input = new SigmaDlogCommonInput(h_ge);
-        //Calls the verify function of the verifier.
-        //verifier.verify(input); 
         Boolean result = verifier.verify(input);
         System.out.println("\n\nVerified : "+result);
-        System.out.println("\n___________________________________________________________________");
 
 
 
         System.out.println("\n\nCOMMIT PHASE : \n");
-       // TimeUnit.SECONDS.sleep(2);
-
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        
+        String file_or_terminal = "";
+        String in = "";
+
+        while(true){
+        System.out.println("Enter 1 for file input, 2 for terminal input");
+        file_or_terminal = br.readLine();
+        if(file_or_terminal.equals("1") || file_or_terminal.equals("2")){
+            break;
+        }else{
+            System.out.println("Wrong Choice, try again!");
+        }
+        }
+
+        if(file_or_terminal.equals("2")){
         System.out.println("Enter the message");
-        String in = br.readLine();
+        in = br.readLine();
+        }else{
+        System.out.println("\nReading from file...    \n");
+        in = new String(Files.readAllBytes(Paths.get("data.txt")));   
+        }
+
+
         System.out.println("Enter the length of each piece the message has to be broken into. \nThe number of leaves in the Merkle tree is dependent on this value");
+        System.out.println("This can roughly be upto "+in.length()+"\n");
         int leaf_len = Integer.parseInt(br.readLine());
         System.out.println("Enter the number of pieces the each message piece has to be broken into. \nThis is the t value used in RS codes");
+        System.out.println("This can roughly be upto "+leaf_len+"\n");
         int pieces = Integer.parseInt(br.readLine());
 
         RS rs = new RS((ZpGroupParams)(dlc.dlog.getGroupParams()));
@@ -210,7 +222,7 @@ public class Committer{
         String[] randomsArray = new String[leaves.size()];
         //The following process of finding the RS codes has to be done for all the pieces of the message.
         for(int index=0; index<commitsArray.length; index++){
-        List<BigInteger> images = rs.process(in, pieces);
+        List<BigInteger> images = rs.process(leaves.get(index), pieces);
 
         //Warning : All the commits, messages and randoms created this way will be of the form : |2456654654|2456621451|...|2456954654|
         //Strip the start and the end before splitting them using the pipe delimiter
@@ -220,45 +232,28 @@ public class Committer{
         StringBuilder allRandoms = new StringBuilder("|");
 
         for(BigInteger m : images){
-        System.out.println("Message in the field : "+m);
-        BigInteger r = BigIntegers.createRandomInRange(BigInteger.ZERO, q_minus_one, dlc.random);
-        BigInteger comm = dlc.commit(m, r);
-
-        allCommits.append(comm.toString()+"|");
-        allMessages.append(m.toString()+"|");
-        allRandoms.append(r.toString()+"|");
-
+            BigInteger r = BigIntegers.createRandomInRange(BigInteger.ZERO, q_minus_one, dlc.random);
+            BigInteger comm = dlc.commit(m, r);
+            allCommits.append(comm.toString()+"|");
+            allMessages.append(m.toString()+"|");
+            allRandoms.append(r.toString()+"|");
     	}
         commitsArray[index]=allCommits.toString();
         messagesArray[index]=allMessages.toString();
         randomsArray[index]=allRandoms.toString();
-
-        //System.out.println("Commit : "+commitsArray[index]);
-        //TimeUnit.SECONDS.sleep(7);
-        //System.out.println("Message : "+messagesArray[index]);
-        //TimeUnit.SECONDS.sleep(7);
-        //System.out.println("Random : "+randomsArray[index]);
-        //TimeUnit.SECONDS.sleep(7);
-
         }
-    	//System.out.println(allCommits.toString());
-    	//System.out.println(allMessages.toString());
-    	//System.out.println(allRandoms.toString());
-
-        //At this point the array commitsArray has roughly len(in)/leaf_len number of entries each corresponding to 80(security parameter)
+        //At this point the array commitsArray has roughly len(in)/leaf_len number of entries each corresponding to N(security parameter)
         //field elements (big integers) that are appended together using '|'
         //We send this array into the Merkle tree.
-
         Merkle tree = new Merkle();
         tree.makeMerkleTree(commitsArray);
         byte[] sha = tree.getRoot().getSha256();
         //byte array cannot be reconstructed as is at the other end no matter what encoding is used
         //So each character in the array is separately appended to a string and that string is sent 
-        //to the Receiver. At the other end the string is parsed and tbe sha array is reconstructed
+        //to the Receiver. At the other end the string is parsed and the sha array is reconstructed
         String sendableByteArray = dlc.getSerialByteArray(sha);
-        System.out.println(sendableByteArray);
+        //System.out.println(sendableByteArray);
         System.out.println("Root Hash String: "+new String(sha));
-
         System.out.println("\nMessage Committed and Merkle Tree Created. \nSending Root Hash\n\n");
         //dlc.channel.send(new String(tree.getRoot().getSha256()));
         //String a = "devan harikumar";
@@ -273,27 +268,32 @@ public class Committer{
         }
         Integer loc = Integer.parseInt(rev);
         List<Node> siblingsUpstream = tree.reveal(loc);
-        for(Node node : siblingsUpstream){
-            System.out.println(node.getId()+" : "+new String(node.getSha256()));
-        }
+        //for(Node node : siblingsUpstream){
+        //    System.out.println(node.getId()+" : "+new String(node.getSha256()));
+        //}
         //At this point we are sending all the commit values for the message. These commit values are created using the Reed Solomon
         //Implementation, which means we may not need all of them to reconstruct the message. In future this has to be changed to a random
         //n number of values selected from all the values.
         System.out.println("Received Node Id. \nSending commits\n");
-        dlc.channel.send(commitsArray[loc].toString());
+        dlc.channel.send(commitsArray[loc-1].toString());
 
         dlc.channel.receive();
-        System.out.println("Received Ack. \nSending r\n");
-        dlc.channel.send(randomsArray[loc].toString());
+        System.out.println("Received Ack. \nSending randoms\n");
+        dlc.channel.send(randomsArray[loc-1].toString());
 
         dlc.channel.receive();
-        System.out.println("Received Ack. \nSending m\n");
-        dlc.channel.send(messagesArray[loc].toString());
+        System.out.println("Received Ack. \nSending messages\n");
+        dlc.channel.send(messagesArray[loc-1].toString());
+
+        dlc.channel.receive();
+        System.out.println("Received Ack. \nSending Merkle tree data for verification\n");
+        String encodedSiblings = tree.revealEncoded(loc);
+        dlc.channel.send(encodedSiblings);
 
         dlc.channel.receive();
         System.out.println("Received Ack. \nCommitter rests\n\n\n");
         }
-        }
+    }
 
         //The following Merkle tree operations are to be done on the Receiver side. But as long as we do not have a 3rd party exposing the 
         //Merkle tree APIs we can do it here to check if it is correct.

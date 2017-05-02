@@ -6,7 +6,7 @@ import edu.biu.scapi.primitives.dlog.cryptopp.CryptoPpDlogZpSafePrime;
 import edu.biu.scapi.primitives.dlog.groupParams.ZpGroupParams;
 
 //This code converts a string into a polynomial by splitting the it into equal length subtrings,
-//and the polynomial is evaluated to N values. The values are called images in
+//and the polynomial is evaluated to N values in modular arithmetic. The values are called images in
 //this implementation. At any time, we need only t of them to rebuild the polynomial that
 //corresponds to an input string.
 
